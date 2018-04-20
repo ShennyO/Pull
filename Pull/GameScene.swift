@@ -30,6 +30,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var lifeNodes = [SKSpriteNode]()
     var ballLayer: SKNode!
     var gameOverLabel: SKNode!
+    var restart: MSButtonNode!
 
     
     let fixedDelta: CFTimeInterval = 1.0 / 60.0 /* 60fps*/
@@ -57,6 +58,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         redSource = self.childNode(withName: "red") as! SKSpriteNode
         heroSource = self.childNode(withName: "square") as! SKSpriteNode
         gameOverLabel = self.childNode(withName: "GameOver")
+        restart = self.childNode(withName: "restart") as! MSButtonNode
+        restart.isHidden = true
+        restart.selectedHandler = {
+            
+            /* Grab reference to our SpriteKit view */
+            let skView = self.view as SKView!
+            
+            /* Load Game scene */
+            let scene = GameScene(fileNamed:"GameScene") as GameScene!
+            
+            /* Ensure correct aspect mode */
+            scene?.scaleMode = .aspectFill
+            
+            /* Restart game scene */
+            skView?.presentScene(scene)
+            
+        }
         hero = heroSource.copy() as! SKSpriteNode
         hero.position = CGPoint(x: 375, y: 50)
         physicsWorld.contactDelegate = self
@@ -255,19 +273,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
-    func handleGameOver() {
-        if gameState == .gameOver {
-            let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-            let gameOverScene = GameOverScene(size: self.size)
-            view?.presentScene(gameOverScene, transition: reveal)
-        }
-    }
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         if lives <= 0 {
             gameState = .gameOver
             gameOverLabel.isHidden = false
+            restart.isHidden = false
             ballLayer.removeAllChildren()
         }
         blueSpawnTimer += fixedDelta
