@@ -19,7 +19,7 @@
 		8485D0532086B92500B1FACE /* PullUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8485D0522086B92500B1FACE /* PullUITests.swift */; };
 		8485D0632086C64F00B1FACE /* Ball.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8485D0622086C64F00B1FACE /* Ball.swift */; };
 		84B698DB208A997A001E50A1 /* MSButtonNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B698DA208A997A001E50A1 /* MSButtonNode.swift */; };
-		84CADF74208A5E85004CBE14 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CADF73208A5E85004CBE14 /* GameOverScene.swift */; };
+		84C22C06208AB26E0098F297 /* Collision.sks in Resources */ = {isa = PBXBuildFile; fileRef = 84C22C05208AB26E0098F297 /* Collision.sks */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,7 +58,7 @@
 		8485D0542086B92500B1FACE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8485D0622086C64F00B1FACE /* Ball.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ball.swift; sourceTree = "<group>"; };
 		84B698DA208A997A001E50A1 /* MSButtonNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSButtonNode.swift; sourceTree = "<group>"; };
-		84CADF73208A5E85004CBE14 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
+		84C22C05208AB26E0098F297 /* Collision.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Collision.sks; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,8 +113,8 @@
 				8485D02E2086B92400B1FACE /* GameScene.sks */,
 				8485D0302086B92400B1FACE /* Actions.sks */,
 				8485D0322086B92400B1FACE /* GameScene.swift */,
+				84C22C05208AB26E0098F297 /* Collision.sks */,
 				84B698DA208A997A001E50A1 /* MSButtonNode.swift */,
-				84CADF73208A5E85004CBE14 /* GameOverScene.swift */,
 				8485D0622086C64F00B1FACE /* Ball.swift */,
 				8485D0342086B92400B1FACE /* GameViewController.swift */,
 				8485D0362086B92400B1FACE /* Main.storyboard */,
@@ -254,6 +254,7 @@
 				8485D02F2086B92400B1FACE /* GameScene.sks in Resources */,
 				8485D03A2086B92400B1FACE /* Assets.xcassets in Resources */,
 				8485D03D2086B92400B1FACE /* LaunchScreen.storyboard in Resources */,
+				84C22C06208AB26E0098F297 /* Collision.sks in Resources */,
 				8485D0312086B92400B1FACE /* Actions.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,7 +280,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84CADF74208A5E85004CBE14 /* GameOverScene.swift in Sources */,
 				8485D0632086C64F00B1FACE /* Ball.swift in Sources */,
 				8485D0332086B92400B1FACE /* GameScene.swift in Sources */,
 				84B698DB208A997A001E50A1 /* MSButtonNode.swift in Sources */,

@@ -9,10 +9,6 @@
 import SpriteKit
 import GameplayKit
 
-enum HeroState {
-    case normal
-    case weakened
-}
 
 enum GameState {
     case gameOver
@@ -26,6 +22,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var blueSource: SKSpriteNode!
     var redSource: SKSpriteNode!
     var scoreLabel: SKLabelNode!
+    var boomSource: SKSpriteNode!
+    var boomTwoSource: SKSpriteNode!
+    var boomThreeSource: SKSpriteNode!
+    var boomFourSource: SKSpriteNode!
+    var boomFiveSource: SKSpriteNode!
     var tapLocation: CGPoint!
     var lifeNodes = [SKSpriteNode]()
     var ballLayer: SKNode!
@@ -35,14 +36,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let fixedDelta: CFTimeInterval = 1.0 / 60.0 /* 60fps*/
     var blueSpawnTimer: CFTimeInterval = 0
-    var redSpawnTimer: CFTimeInterval = 0
+    var ballTimer: CFTimeInterval = 0.5
     var pullable = true
-    var returnAction: SKAction? = nil
     var score = 0
-    var heroState: HeroState = .normal
-    var force: CGFloat = 1
     var lives: Int = 3
     var gameState: GameState = .active
+    var force: CGFloat = 1
+    var hitCounter = 0
+    var NodesHitCounter = 0
     
     override func didMove(to view: SKView) {
         //Adding our lifeNodes to our array, now we can delete them in order
@@ -57,6 +58,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         blueSource = self.childNode(withName: "blue") as! SKSpriteNode
         redSource = self.childNode(withName: "red") as! SKSpriteNode
         heroSource = self.childNode(withName: "square") as! SKSpriteNode
+        boomSource = self.childNode(withName: "Boom") as! SKSpriteNode
+        boomTwoSource = self.childNode(withName: "twoCollision") as! SKSpriteNode
+        boomThreeSource = self.childNode(withName: "threeCollision") as! SKSpriteNode
+        boomFourSource = self.childNode(withName: "fourCollision") as! SKSpriteNode
+        boomFiveSource = self.childNode(withName: "fiveCollision") as! SKSpriteNode
         gameOverLabel = self.childNode(withName: "GameOver")
         restart = self.childNode(withName: "restart") as! MSButtonNode
         restart.isHidden = true
@@ -81,51 +87,76 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(hero)
     }
     
-
-    func spawnBalls() {
-        if gameState == .active {
-            spawnRedBall()
-            spawnBlueBall()
+    func createCollisionBoom(point: CGPoint) {
+        let boom: SKSpriteNode!
+        let expandingAction: SKAction!
+    
+        if hitCounter == 1 {
+            boom = self.boomSource.copy() as! SKSpriteNode
+            expandingAction = SKAction.scale(to: 3.0,                                                        duration: 0.2)
+            score += 1
+        } else if hitCounter == 2 {
+            boom = self.boomTwoSource.copy() as! SKSpriteNode
+            expandingAction = SKAction.scale(to: 3.0,                                                        duration: 0.2)
+            score += 3
+        } else if hitCounter == 3 {
+            boom = self.boomThreeSource.copy() as! SKSpriteNode
+            expandingAction = SKAction.scale(to: 4.0,                                                        duration: 0.2)
+            score += 10
+        } else if hitCounter == 4 {
+            boom = self.boomFourSource.copy() as! SKSpriteNode
+            expandingAction = SKAction.scale(to: 4.5,                                                        duration: 0.2)
+            score += 20
+        } else if hitCounter <= 5 {
+            boom = self.boomFiveSource.copy() as! SKSpriteNode
+            expandingAction = SKAction.scale(to: 5.0,                                                        duration: 0.3)
+            score += 50
+        } else {
+            return
         }
         
+        
+        boom.position = self.convert(point, to: ballLayer)
+        self.addChild(boom)
+        let remove = SKAction.run {
+            boom.removeFromParent()
+        }
+        let sequence = SKAction.sequence([expandingAction, remove])
+        boom.run(sequence)
     }
     
-    func spawnRedBall() {
-        if redSpawnTimer > 1.5 {
-            let random = arc4random_uniform(100)
-            redSpawnTimer = 0
-            let newBallNode = redSource.copy() as! SKSpriteNode
-            let positionX: CGFloat!
-            let positionY = CGFloat(randomNumber(inRange: 340...960))
-            if random <= 50 {
-                positionX = -260
-                newBallNode.physicsBody?.velocity.dx = CGFloat(575)
-            } else {
-                positionX = 900
-                newBallNode.physicsBody?.velocity.dx = CGFloat(-575)
-            }
-            let position = CGPoint(x: positionX, y: positionY)
-            newBallNode.position = self.convert(position, to: ballLayer)
-            ballLayer.addChild(newBallNode)
+    //:MARK handle levels in the game
+    
+    func handleLevel() {
+        if NodesHitCounter >= 100 {
+            force = 1.5
+            ballTimer = 0.375
+            
+        } else if NodesHitCounter >= 300 {
+            force = 3
+            ballTimer = 0.200
         }
     }
+    
+   
+    
     
     func spawnBlueBall() {
-        let random = randomNumber(inRange: 100...650)
-        if blueSpawnTimer > 2 {
-            blueSpawnTimer = 0
-            
-            let newBall = blueSource.copy() as! SKSpriteNode
-            let positionY: CGFloat = 1500
-            let positionX = CGFloat(random)
-            let position = CGPoint(x: positionX, y: positionY)
-            newBall.position = self.convert(position, to: ballLayer)
-            newBall.physicsBody?.velocity.dy = -400
-            ballLayer.addChild(newBall)
-
+        if gameState == .active {
+            let random = randomNumber(inRange: 100...650)
+            if blueSpawnTimer > ballTimer {
+                blueSpawnTimer = 0
+                
+                let newBall = blueSource.copy() as! SKSpriteNode
+                let positionY: CGFloat = 1500
+                let positionX = CGFloat(random)
+                let position = CGPoint(x: positionX, y: positionY)
+                newBall.position = self.convert(position, to: ballLayer)
+                newBall.physicsBody?.velocity.dy = -500 * force
+                ballLayer.addChild(newBall)
+                
+            }
         }
-        
-        
     }
     
     func getHypotenuse(x: CGFloat, y: CGFloat) -> CGFloat {
@@ -136,7 +167,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let dX = location.x - hero.position.x
         let dY = location.y - hero.position.y
         let slope = dY / dX
-        let answer = (800 / slope) + dX
+        let answer = (((1000 * force) - dY) / slope) + dX
         return answer
     }
     
@@ -145,10 +176,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func Grab(location: CGPoint) {
         if gameState == .active {
             if pullable {
+                hitCounter = 0
                 pullable = !pullable
-                let smalldY = location.y - hero.position.y
-                let dX = newdX(location: location) * CGFloat(force)
-                let dY: CGFloat = (CGFloat(800) + smalldY) * CGFloat(force)
+                let dX = newdX(location: location)
+                let dY: CGFloat = CGFloat(1000 * force)
                 let vector = CGVector(dx: dX, dy: dY)
                 let angle = atan2f(Float(vector.dx), Float(vector.dy))
                 hero.zRotation = CGFloat(angle)
@@ -158,29 +189,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    func activateWeaken() {
-        if gameState == .active {
-            let wait = SKAction.wait(forDuration:3)
-            let weaken = SKAction.run {
-                self.heroState = .weakened
-            }
-            let normalize = SKAction.run {
-                self.heroState = .normal
-            }
-            run(SKAction.sequence([weaken, wait, normalize]))
-        }
-    }
     
-    
-    func handleHero(state: HeroState) {
-        
-        if state == .normal {
-            force = 1
-            hero.alpha = 1
-        } else {
-            force = 0.3
-            hero.alpha = 0.5
-        }
+    func handleHero() {
         
         if hero.position.y > CGFloat(960) {
             resetHero()
@@ -196,11 +206,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
+    func resetdX() -> CGFloat {
+        let dX = (CGFloat(375) - hero.position.x)
+        let dY = (CGFloat(50) - hero.position.y)
+        let slope = dY / dX
+        let newdX = ((-550 * force) - dY) / slope + dX
+        //x will already have a negative/positive position
+        return newdX + dX
+    }
+    
     func resetHero() {
     
         hero.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-        let dX = (CGFloat(375) - hero.position.x) * CGFloat(force)
-        let dY = (CGFloat(50) - hero.position.y) * CGFloat(force)
+        let dX = resetdX()
+        let dY = CGFloat(-550 * force) - hero.position.y
         let vector = CGVector(dx: dX, dy: dY)
         hero.physicsBody?.applyImpulse(vector)
     }
@@ -227,6 +246,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //if blue ball hits the borders
             if contactA.categoryBitMask == 8 || contactB.categoryBitMask == 8 {
                 
+                
                 lives -= 1
                 let lifeNode = self.lifeNodes.last
                 lifeNode?.removeFromParent()
@@ -240,7 +260,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
                 //if blueBall hits the square
             } else if contactA.categoryBitMask == 5 || contactB.categoryBitMask == 5 {
-                score += 1
+                hitCounter += 1
+                NodesHitCounter += 1
+                let position = contact.contactPoint
+                
+                createCollisionBoom(point: position)
                 //nodeA is the square
                 if contactA.categoryBitMask > contactB.categoryBitMask {
                     nodeB.removeFromParent()
@@ -260,7 +284,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
                 //if red ball hits the square
             } else if contactA.categoryBitMask == 5 || contactB.categoryBitMask == 5 {
-                activateWeaken()
+//                activateWeaken()
                 resetHero()
                 //nodeA is the square
                 if contactA.categoryBitMask > contactB.categoryBitMask {
@@ -283,9 +307,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             ballLayer.removeAllChildren()
         }
         blueSpawnTimer += fixedDelta
-        redSpawnTimer += fixedDelta
-        spawnBalls()
-        handleHero(state: heroState)
+        handleLevel()
+        spawnBlueBall()
+        handleHero()
         scoreLabel.text = "\(score)"
     }
 }
