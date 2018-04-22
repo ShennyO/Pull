@@ -97,19 +97,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             score += 1
         } else if hitCounter == 2 {
             boom = self.boomTwoSource.copy() as! SKSpriteNode
-            expandingAction = SKAction.scale(to: 3.0,                                                        duration: 0.2)
+            expandingAction = SKAction.scale(to: 4.0,                                                        duration: 0.2)
             score += 3
         } else if hitCounter == 3 {
             boom = self.boomThreeSource.copy() as! SKSpriteNode
-            expandingAction = SKAction.scale(to: 4.0,                                                        duration: 0.2)
+            expandingAction = SKAction.scale(to: 6.0,                                                        duration: 0.2)
             score += 10
         } else if hitCounter == 4 {
             boom = self.boomFourSource.copy() as! SKSpriteNode
-            expandingAction = SKAction.scale(to: 4.5,                                                        duration: 0.2)
+            expandingAction = SKAction.scale(to: 8.0,                                                        duration: 0.2)
             score += 20
         } else if hitCounter <= 5 {
             boom = self.boomFiveSource.copy() as! SKSpriteNode
-            expandingAction = SKAction.scale(to: 5.0,                                                        duration: 0.3)
+            expandingAction = SKAction.scale(to: 10,                                                        duration: 0.3)
             score += 50
         } else {
             return
