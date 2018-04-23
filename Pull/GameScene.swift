@@ -27,6 +27,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var boomThreeSource: SKSpriteNode!
     var boomFourSource: SKSpriteNode!
     var boomFiveSource: SKSpriteNode!
+    var heartSource: SKSpriteNode!
     var tapLocation: CGPoint!
     var lifeNodes = [SKSpriteNode]()
     var ballLayer: SKNode!
@@ -42,6 +43,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var lives: Int = 3
     var gameState: GameState = .active
     var force: CGFloat = 1
+    var ballSpeed: CGFloat = 1
     var hitCounter = 0
     var NodesHitCounter = 0
     
@@ -58,6 +60,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         blueSource = self.childNode(withName: "blue") as! SKSpriteNode
         redSource = self.childNode(withName: "red") as! SKSpriteNode
         heroSource = self.childNode(withName: "square") as! SKSpriteNode
+        heartSource = self.childNode(withName: "heart") as! SKSpriteNode
         boomSource = self.childNode(withName: "Boom") as! SKSpriteNode
         boomTwoSource = self.childNode(withName: "twoCollision") as! SKSpriteNode
         boomThreeSource = self.childNode(withName: "threeCollision") as! SKSpriteNode
@@ -87,6 +90,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(hero)
     }
     
+    
+    
     func createCollisionBoom(point: CGPoint) {
         let boom: SKSpriteNode!
         let expandingAction: SKAction!
@@ -106,11 +111,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else if hitCounter == 4 {
             boom = self.boomFourSource.copy() as! SKSpriteNode
             expandingAction = SKAction.scale(to: 8.0,                                                        duration: 0.2)
-            score += 20
-        } else if hitCounter <= 5 {
+            score += 25
+        } else if hitCounter >= 5 {
             boom = self.boomFiveSource.copy() as! SKSpriteNode
             expandingAction = SKAction.scale(to: 10,                                                        duration: 0.3)
-            score += 50
+            score += 100
         } else {
             return
         }
@@ -128,16 +133,42 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     //:MARK handle levels in the game
     
     func handleLevel() {
-        if NodesHitCounter >= 100 {
+        if NodesHitCounter >= 100 && NodesHitCounter <= 300 {
             force = 1.5
+            ballSpeed = 1.5
             ballTimer = 0.375
             
         } else if NodesHitCounter >= 300 {
-            force = 3
-            ballTimer = 0.200
+            ballSpeed = 1.75
+            force = 1.75
+            ballTimer = 0.3
+            hero.color = UIColor.red
         }
     }
     
+    func addHealth() {
+        let newHealth = self.lifeNodes.first?.copy() as! SKSpriteNode
+        let positionY: CGFloat = 1275
+        let lastLifeNode = self.lifeNodes.last
+        let positionX = (lastLifeNode?.position.x)! - CGFloat(71.444)
+        newHealth.position = CGPoint(x: positionX, y: positionY)
+        self.addChild(newHealth)
+        self.lifeNodes.append(newHealth)
+    }
+    
+    func spawnHearts() {
+        let random = randomNumber(inRange: 0...5000)
+        if random <= 1 {
+            let xSpawnPoint = randomNumber(inRange: 100...650)
+            let heart = heartSource.copy() as! SKSpriteNode
+            let positionY: CGFloat = 1500
+            let positionX = CGFloat(xSpawnPoint)
+            let position = CGPoint(x: positionX, y: positionY)
+            heart.position = self.convert(position, to: ballLayer)
+            heart.physicsBody?.velocity.dy = -600 * ballSpeed
+            ballLayer.addChild(heart)
+        }
+    }
    
     
     
@@ -152,7 +183,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let positionX = CGFloat(random)
                 let position = CGPoint(x: positionX, y: positionY)
                 newBall.position = self.convert(position, to: ballLayer)
-                newBall.physicsBody?.velocity.dy = -500 * force
+                newBall.physicsBody?.velocity.dy = -500 * ballSpeed
                 ballLayer.addChild(newBall)
                 
             }
@@ -272,9 +303,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     nodeA.removeFromParent()
                 }
             }
-            //Handling redBall contacts
-        } else if nodeA.name == "red" || nodeB.name == "red" {
-            //if red ball hits the borders
+            //Handling heart contacts
+        } else if nodeA.name == "heart" || nodeB.name == "heart" {
+            // if heart hits border
             if contactA.categoryBitMask == 8 || contactB.categoryBitMask == 8 {
                 // border is contact A, blue ball contactB
                 if contactA.categoryBitMask > contactB.categoryBitMask {
@@ -282,16 +313,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 } else { //nodeA is blue
                     nodeA.removeFromParent()
                 }
-                //if red ball hits the square
             } else if contactA.categoryBitMask == 5 || contactB.categoryBitMask == 5 {
-//                activateWeaken()
-                resetHero()
-                //nodeA is the square
+                lives += 1
+                addHealth()
                 if contactA.categoryBitMask > contactB.categoryBitMask {
                     nodeB.removeFromParent()
                 } else { //nodeA is blue
                     nodeA.removeFromParent()
                 }
+                
             }
         }
         
@@ -309,6 +339,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         blueSpawnTimer += fixedDelta
         handleLevel()
         spawnBlueBall()
+        spawnHearts()
         handleHero()
         scoreLabel.text = "\(score)"
     }
